@@ -51,29 +51,18 @@ export default {
     }
   },
   methods: {
-    async addNewCollection() {
-      const newCollection = {
-        id: Math.random().toString(36).substr(2, 9), // Random ID
-        name: `Collection ${Math.random().toString(36).substr(2, 5)}`, // Random name
-        color: Math.floor(Math.random() * 16777215).toString(16), // Random color
-        private: Math.random() < 0.5, // Randomly true or false
-        filters: [] // Assuming an empty filters array for simplicity
-      }
-
-      try {
-        await axios.post("http://localhost:3108/collection", newCollection)
-        console.log("New collection added:", newCollection)
-
-        // Optionally, update local collections
-        this.collections.push(newCollection)
-      } catch (error) {
-        console.error("Error adding new collection:", error)
-      }
-    },
     handleCollectionClick(collection) {
-      // Logic to handle the collection click event
-      // For example, navigate to the collection's detail page or open a dialog
-      console.log("Collection clicked:", collection.name)
+      this.$router.push({
+        path: `/collection`,
+        query: { collectionId: collection.id }
+      })
+    },
+
+    addNewCollection() {
+      this.$router.push({
+        path: `/collection`,
+        query: { collectionId: "NEW" }
+      })
     }
   }
 }
