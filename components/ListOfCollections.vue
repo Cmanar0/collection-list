@@ -15,8 +15,8 @@
       <v-col cols="12" md="8">
         <!-- Collection Type Title -->
 
-        <!-- Collection Cards including New Collection Card -->
-        <v-row>
+        <!-- Collection Cards -->
+        <!-- <v-row>
           <v-col v-for="collection in collections" :key="collection.id" cols="12" sm="6" md="4">
             <v-card
               class="elevation-2 collection-card"
@@ -27,9 +27,14 @@
             >
               <v-card-title>{{ collection.name }}</v-card-title>
               <v-card-text>
-                <!-- Additional collection data here -->
               </v-card-text>
             </v-card>
+          </v-col>
+        </v-row> -->
+
+        <v-row>
+          <v-col v-for="collection in collections" :key="collection.id" cols="12" sm="6" md="4">
+            <CollectionCard :collection="collection" @click="handleCollectionClick" />
           </v-col>
         </v-row>
       </v-col>
@@ -38,8 +43,6 @@
 </template>
 
 <script>
-import axios from "axios"
-
 export default {
   props: ["collections", "collectionType"],
   computed: {
@@ -50,17 +53,15 @@ export default {
       return "All" // Default display text if collectionType is not as expected
     }
   },
+  data() {
+    return {
+      chosenFilter: 0
+    }
+  },
   methods: {
-    handleCollectionClick(collection) {
-      this.$router.push({
-        path: `/collection`,
-        query: { collectionId: collection.id }
-      })
-    },
-
     addNewCollection() {
       this.$router.push({
-        path: `/collection`,
+        path: `/collection-detail`,
         query: { collectionId: "NEW" }
       })
     }
@@ -69,19 +70,15 @@ export default {
 </script>
 
 <style scoped>
-.collection-card {
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-.collection-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
 .center {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.filter-items {
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: #666;
 }
 .add-collection {
   cursor: pointer;
@@ -94,7 +91,7 @@ export default {
 }
 .collection-card {
   margin-bottom: 20px;
-  height: 130px;
+  height: 210px;
 }
 .title {
   margin-left: 10px;
@@ -105,5 +102,15 @@ export default {
   justify-content: space-between;
   align-items: center;
   flex-direction: row;
+}
+.collection-top {
+  padding: 10px;
+  color: #fff; /* Default text color */
+}
+
+.collection-bottom {
+  padding: 10px;
+  background-color: #fff;
+  color: #000;
 }
 </style>

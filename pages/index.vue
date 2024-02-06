@@ -21,7 +21,7 @@
       </v-col>
     </v-row>
     <!-- Collections Display Component -->
-    <CollectionsDisplayComponent :collections="displayedCollections" :collectionType="selectedCollectionType" />
+    <ListOfCollections :collections="displayedCollections" :collectionType="selectedCollectionType" />
   </v-container>
 </template>
 
