@@ -49,6 +49,8 @@
 </template>
 <script>
 import axios from "axios"
+import { eventBus } from "~/services/eventBus"
+
 export default {
   mounted() {
     if (this.filterOptions[0]) {
@@ -61,7 +63,7 @@ export default {
       selectedFilter: "",
       items: [
         { title: "Edit", action: this.editCollection },
-        { title: "Delete", action: this.deleteCollection }
+        { title: "Delete", action: this.confirmDelete }
       ]
     }
   },
@@ -76,13 +78,25 @@ export default {
         }
       })
     },
-    async deleteCollection(collection) {
+    confirmDelete() {
+      eventBus.emit("show-dialog", {
+        title: "Delete collection",
+        message: "Do you really want to delete this collection?",
+        dialogType: "confirm",
+        onConfirm: () => {
+          this.deleteCollection()
+          eventBus.emit("close-dialog")
+        }
+      })
+    },
+    async deleteCollection() {
       try {
-        const response = await axios.delete(`http://localhost:3108/collection/${collection.id}`)
-        console.log(response.data.msg)
-        window.location.reload()
+        await axios.delete(`http://localhost:3108/collection/${this.collection.id}`)
+        this.showSnackbar("Collection deleted successfully", "success")
+        window.open("/", "_self")
       } catch (error) {
         console.error("Error deleting collection:", error)
+        this.showSnackbar("Error deleting collection", "error")
       }
     },
     handleCollectionClick(collection) {
@@ -90,6 +104,10 @@ export default {
         path: `/collection-detail`,
         query: { collectionId: collection.id, filterIndex: this.filterOptions.indexOf(this.selectedFilter) }
       })
+    },
+    showSnackbar(message, color) {
+      // Emitting an event to show snackbar with the message and color
+      eventBus.emit("show-snackbar", { text: message, color: color })
     },
     textColor(bgColor) {
       if (!bgColor) return "#000" // Default to black if no color is provided

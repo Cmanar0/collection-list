@@ -93,7 +93,14 @@ export default {
     },
     openDialog() {
       // Emit a "show-dialog" event using mitt to open a dialog
-      eventBus.emit("show-dialog", { message: "This is a general message", title: "General dialog" })
+      eventBus.emit("show-dialog", {
+        message: "This is a general message",
+        title: "General dialog",
+        dialogType: "alert",
+        onConfirm: () => {
+          console.log("Dialog confirmed")
+        }
+      })
     }
   },
   async mounted() {

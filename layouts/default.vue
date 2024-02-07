@@ -9,7 +9,15 @@
 
     <!-- Loading spinner -->
     <div v-if="loading" class="loading"></div>
-    <v-progress-circular class="center" v-if="loading" indeterminate color="primary" model-value="20" :size="80" :width="8"></v-progress-circular>
+    <v-progress-circular
+      v-if="loading"
+      class="center"
+      indeterminate
+      color="primary"
+      model-value="20"
+      :size="80"
+      :width="8"
+    ></v-progress-circular>
 
     <!-- Error Dialog -->
     <v-dialog v-model="errorDialog" max-width="400">
@@ -31,10 +39,13 @@
           {{ dialog.message }}
         </v-card-text>
         <v-card-actions>
-          <v-btn color="primary" @click="closeDialog">Close</v-btn>
+          <v-btn color="green" @click="dialog.onConfirm" v-if="dialog.dialogType === 'confirm'">Yes</v-btn>
+          <v-btn color="primary" @click="closeDialog" v-if="dialog.dialogType === 'alert'">OK</v-btn>
+          <v-btn color="red" @click="closeDialog" v-if="dialog.dialogType === 'confirm'">No</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
+
     <!-- Error Snackbar -->
     <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="6000">
       {{ snackbar.text }}
@@ -63,7 +74,9 @@ export default {
       dialog: {
         show: false,
         title: "",
-        message: ""
+        message: "",
+        onConfirm: null, // Function to be executed on confirming the dialog
+        dialogType: "alert" // Default to 'confirm', can be 'alert' for OK-only
       }
     }
   },
@@ -71,6 +84,7 @@ export default {
     // Listen for "api-error" event using eventBus
     eventBus.on("api-error", this.handleApiError)
     eventBus.on("show-dialog", this.showDialog)
+    eventBus.on("close-dialog", this.closeDialog)
     eventBus.on("loading-true", () => {
       this.loading = true
     })
@@ -83,7 +97,7 @@ export default {
     // Remove event listener when the component is destroyed
     eventBus.off("api-error", this.handleApiError)
     eventBus.on("show-dialog", this.showDialog)
-
+    eventBus.on("close-dialog", this.closeDialog)
     eventBus.on("loading-true", () => {
       this.loading = true
     })
@@ -98,13 +112,16 @@ export default {
       this.snackbar.color = color || "info"
       this.snackbar.show = true
     },
-    showDialog({ title, message }) {
+    showDialog({ title, message, onConfirm, dialogType }) {
       this.dialog.title = title
       this.dialog.message = message
+      this.dialog.onConfirm = onConfirm || (() => {})
+      this.dialog.dialogType = dialogType
       this.dialog.show = true
     },
     closeDialog() {
       this.dialog.show = false
+      this.dialog.onConfirm = null // Reset the onConfirm function
     },
     handleApiError(error) {
       console.log("blabla :>> ")
@@ -123,16 +140,21 @@ export default {
 <style scoped>
 .loading {
   position: fixed;
-  min-height: 100%;
-  min-width: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 9998;
   background-color: rgba(100, 100, 100, 0.301);
 }
+
 .center {
-  position: absolute;
+  z-index: 1000;
+  position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1000;
 }
 </style>

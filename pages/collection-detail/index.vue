@@ -14,8 +14,14 @@
         </v-col>
       </v-row>
       <div class="row">
-        <h3 class="title grey--text text--darken-1">Edit collection and it's filters or create a new one</h3>
-        <v-btn color="primary" @click="toggleEditing">Edit Collection </v-btn>
+        <h3 class="title grey--text text--darken-1">Edit collection and its filters or create a new one</h3>
+        <div>
+          <v-btn color="error" class="delete" v-if="!newPost && editCollection" @click="confirmDelete"
+            >Delete Collection</v-btn
+          >
+          <v-btn color="primary" v-if="!editCollection" @click="toggleEditing">Edit Collection</v-btn>
+          <v-btn color="primary" v-if="editCollection" @click="toggleEditing">Cancel Editing</v-btn>
+        </div>
       </div>
       <br />
       <v-row>
@@ -239,6 +245,27 @@ export default {
     }
   },
   methods: {
+    confirmDelete() {
+      eventBus.emit("show-dialog", {
+        title: "Delete collection",
+        message: "Do you really want to delete this collection?",
+        dialogType: "confirm",
+        onConfirm: () => {
+          this.deleteCollection()
+          eventBus.emit("close-dialog")
+        }
+      })
+    },
+    async deleteCollection() {
+      try {
+        await axios.delete(`http://localhost:3108/collection/${this.collection.id}`)
+        this.showSnackbar("Collection deleted successfully", "success")
+        this.redirect("/")
+      } catch (error) {
+        console.error("Error deleting collection:", error)
+        this.showSnackbar("Error deleting collection", "error")
+      }
+    },
     onFilterClick(filter) {
       return window.open(
         `/collection-detail?collectionId=${this.collection.id}&filterIndex=${this.collection.filters.indexOf(
@@ -356,6 +383,8 @@ export default {
       eventBus.emit("loading-false")
     },
     async submitForm() {
+      eventBus.emit("loading-true")
+
       const collectionUrl = `http://localhost:3108/collection`
       // Format the color to remove the '#' prefix
       if (this.collection.color.startsWith("#")) {
@@ -379,6 +408,7 @@ export default {
         console.error("Error saving collection:", error)
         this.showSnackbar("Error saving collection", "error")
       }
+      eventBus.emit("loading-false")
     },
     redirectToUpdatedCollection() {
       console.log("redirectToUpdatedCollection :>> ")
@@ -449,5 +479,8 @@ export default {
 .flex {
   display: flex;
   justify-content: flex-start;
+}
+.delete {
+  margin-right: 10px;
 }
 </style>
