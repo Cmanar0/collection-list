@@ -13,14 +13,18 @@
           </v-card>
         </v-col>
       </v-row>
-      <div class="row">
+      <div class="row create">
         <h3 class="title grey--text text--darken-1">Edit collection and its filters or create a new one</h3>
         <div>
           <v-btn color="error" class="delete" v-if="!newPost && editCollection" @click="confirmDelete"
             >Delete Collection</v-btn
           >
-          <v-btn color="primary" v-if="!editCollection" @click="toggleEditing">Edit Collection</v-btn>
-          <v-btn color="primary" v-if="editCollection" @click="toggleEditing">Cancel Editing</v-btn>
+          <v-btn color="primary" class="edit" v-if="!editCollection" @click="toggleEditing"
+            >Edit Collection</v-btn
+          >
+          <v-btn color="primary" class="edit" v-if="editCollection" @click="toggleEditing"
+            >Cancel Editing</v-btn
+          >
         </div>
       </div>
       <br />
@@ -482,5 +486,27 @@ export default {
 }
 .delete {
   margin-right: 10px;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+}
+@media screen and (max-width: 720px) {
+  .delete {
+    width: 100%;
+  }
+  .edit {
+    width: 100%;
+    margin-top: 10px;
+  }
+  .row {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .create {
+    margin-top: 10px;
+  }
 }
 </style>

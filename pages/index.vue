@@ -6,16 +6,18 @@
       <v-btn @click="openDialog">Open Dialog</v-btn>
     </div>
     <br />
-    <v-row justify="left">
-      <v-col cols="12" md="6">
-        <!-- Left Card -->
-        <v-card class="pa-5 my-card" outlined>
-          <!-- Content for the left card -->
+    <v-row>
+      <v-col cols="12">
+        <v-card class="pa-5">
           <h1>Collections</h1>
-          <v-btn-toggle v-model="selectedCollection" mandatory>
-            <v-btn value="all">All collections</v-btn>
-            <v-btn value="private">Private</v-btn>
-            <v-btn value="public">Public</v-btn>
+          <v-btn-toggle
+            v-model="selectedCollection"
+            mandatory
+            class="d-flex flex-column flex-sm-row btn-toggle"
+          >
+            <v-btn class="tool" value="all">All collections</v-btn>
+            <v-btn class="tool" value="private">Private</v-btn>
+            <v-btn class="tool" value="public">Public</v-btn>
           </v-btn-toggle>
         </v-card>
       </v-col>
@@ -114,5 +116,28 @@ export default {
   display: flex;
   justify-content: flex-start;
   gap: 20px;
+}
+.flex-responsive {
+  display: flex;
+  gap: 10px;
+}
+@media screen and (max-width: 720px) {
+  .flex {
+    flex-direction: column;
+  }
+  .tool {
+    min-height: 50px;
+  }
+}
+@media screen and (max-width: 599px) {
+  .flex {
+    flex-direction: column;
+  }
+  .tool {
+    min-height: 50px;
+  }
+  .btn-toggle {
+    min-height: 150px !important;
+  }
 }
 </style>

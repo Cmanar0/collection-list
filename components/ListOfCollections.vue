@@ -2,7 +2,7 @@
   <v-container>
     <div class="row">
       <h3 class="title grey--text text--darken-1">{{ collectionTypeText }} Collections</h3>
-      <v-btn color="primary" @click="addNewCollection">
+      <v-btn color="primary" class="create" @click="addNewCollection">
         <v-icon style="margin-right: 5px" left>mdi-plus</v-icon>
         Create Collection
       </v-btn>
@@ -107,6 +107,15 @@ export default {
   justify-content: space-between;
   align-items: center;
   flex-direction: row;
+}
+@media screen and (max-width: 720px) {
+  .row {
+    flex-direction: column;
+  }
+  .create {
+    margin-top: 10px;
+    width: 100%;
+  }
 }
 .collection-top {
   padding: 10px;
