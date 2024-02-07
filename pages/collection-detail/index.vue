@@ -1,86 +1,149 @@
 <template>
-  <v-container>
-    <v-row justify="left">
-      <v-col cols="12" md="6">
-        <!-- Left Card -->
+  <div style="padding-top: 60px">
+    <v-container :key="componentKey">
+      <v-row justify="left">
+        <v-col cols="12" md="6">
+          <!-- Left Card -->
+          <v-card class="pa-5 my-card flex" outlined>
+            <!-- Content for the left card -->
+            <v-btn color="primary" @click="redirect('/')">
+              <v-icon style="margin-right: 5px">mdi-arrow-left</v-icon>
+            </v-btn>
+            <h1>{{ editOrCreate }}</h1>
+          </v-card>
+        </v-col>
+      </v-row>
+      <div class="row">
+        <h3 class="title grey--text text--darken-1">Edit collection and it's filters or create a new one</h3>
+        <v-btn color="primary" @click="toggleEditing">Edit Collection </v-btn>
+      </div>
+      <br />
+      <v-row>
+        <v-divider horizontal></v-divider>
+      </v-row>
+      <br />
+      <br />
+      <!-- Display Collection Details -->
+      <v-row justify="center">
+        <v-col cols="12" md="8">
+          <div v-if="!editCollection">
+            <div
+              @mouseover="hover = collection.id"
+              class="collection-top"
+              :style="{
+                backgroundColor: `#${collection.color}`,
+                color: textColor(collection.color)
+              }"
+            >
+              <h2>{{ collection.name }}</h2>
+            </div>
+            <br />
+            <p>Private: {{ collection.private ? "Yes" : "No" }}</p>
+            <br />
+            <div class="filets-container">
+              <v-col cols="12" md="8">
+                <div v-if="!editCollection">
+                  <div v-if="collection.filters.length">
+                    <p>Filters:</p>
+                    <v-row>
+                      <v-col
+                        v-for="(filter, index) in collection.filters"
+                        :key="index"
+                        cols="12"
+                        sm="6"
+                        md="4"
+                      >
+                        <v-card class="filter-card" @click="onFilterClick(filter)">
+                          <v-card-text>
+                            <div>Prematch: {{ filter.prematch }}</div>
+                            <div>Market: {{ filter.market }}</div>
+                            <div>For: {{ filter.for }}</div>
+                            <div>From: {{ filter.from }}</div>
+                            <div>To: {{ filter.to }}</div>
+                          </v-card-text>
+                        </v-card>
+                      </v-col>
+                    </v-row>
+                  </div>
+                </div>
+              </v-col>
+            </div>
+          </div>
+        </v-col>
+      </v-row>
+      <!-- Edit Form -->
+      <v-container :key="componentKey">
+        <v-row justify="center">
+          <v-col cols="12" md="8">
+            <v-form v-if="editCollection" ref="form" v-model="valid">
+              <v-text-field
+                label="Collection Name"
+                v-model="collection.name"
+                :rules="[rules.required]"
+              ></v-text-field>
 
-        <v-card class="pa-5 my-card" outlined>
-          <!-- Content for the left card -->
-          <h1>Collection detail</h1>
-          <router-link to="/" class="my-nav-link">
-            <v-icon style="margin-right: 5px">mdi-arrow-left</v-icon>
-            Go back to collections
-          </router-link>
-        </v-card>
-      </v-col>
-    </v-row>
-    <!-- Display Collection Details -->
-    <div v-if="!editCollection">
-      <h2>{{ collection.name }}</h2>
-      <p>Color: {{ collection.color }}</p>
-      <p>Private: {{ collection.private ? "Yes" : "No" }}</p>
-      <!-- Displaying filters and other properties -->
-      <v-btn color="primary" @click="toggleEditing">Edit Collection</v-btn>
-    </div>
+              <v-switch
+                label="Private"
+                :items="['YES', 'NO']"
+                color="green"
+                v-model="collection.private"
+              ></v-switch>
 
-    <!-- Edit Form -->
-    <v-form v-if="editCollection" ref="form" v-model="valid">
-      <v-btn v-if="!newPost" color="primary" @click="toggleEditing">Cancel editting</v-btn>
-      <v-text-field
-        label="Collection Name"
-        v-model="collection.name"
-        :rules="[rules.required]"
-      ></v-text-field>
+              <v-color-picker
+                label="Color"
+                v-model="collection.color"
+                :rules="[rules.required]"
+                elevation="0"
+              ></v-color-picker>
 
-      <v-color-picker
-        label="Color"
-        v-model="collection.color"
-        :rules="[rules.required]"
-        elevation="0"
-      ></v-color-picker>
+              <!-- Dropdown to select filter to edit or create a new one -->
+              <div class="filters">
+                <div class="create-new-filter">
+                  <v-checkbox
+                    v-if="!newPost"
+                    v-model="newFilter"
+                    label="Create a new fitler"
+                    color="primary"
+                  ></v-checkbox>
+                </div>
+                <v-select
+                  v-if="!newFilter && !newPost"
+                  label="Select Filter"
+                  :items="listOfFilters"
+                  @change="updateFilterIndex"
+                  v-model="selectedFilterIndex"
+                ></v-select>
+              </div>
+              <div class="filters">
+                <v-select
+                  label="Prematch"
+                  :items="['YES', 'NO']"
+                  v-model="collection.filters[filterIndex].prematch"
+                ></v-select>
 
-      <v-switch label="Private" :items="['YES', 'NO']" color="green" v-model="collection.private"></v-switch>
+                <v-select
+                  label="Market"
+                  :items="['FT', 'GOAL_LINE']"
+                  v-model="collection.filters[filterIndex].market"
+                ></v-select>
 
-      <!-- Dropdown to select filter to edit or create a new one -->
-      <v-checkbox
-        v-if="!newPost"
-        v-model="newFilter"
-        label="Create a new fitler"
-        color="primary"
-      ></v-checkbox>
-      <v-select
-        v-if="!newFilter"
-        label="Select Filter"
-        :items="listOfFilters"
-        @change="updateFilterIndex"
-        v-model="selectedFilterIndex"
-      ></v-select>
+                <v-select
+                  label="For"
+                  :items="['HOME', 'DRAW', 'AWAY', 'UNDER', 'OVER']"
+                  v-model="collection.filters[filterIndex].for"
+                ></v-select>
 
-      <v-select
-        label="Prematch"
-        :items="['YES', 'NO']"
-        v-model="collection.filters[filterIndex].prematch"
-      ></v-select>
+                <v-text-field label="From" v-model="collection.filters[filterIndex].from"></v-text-field>
 
-      <v-select
-        label="Market"
-        :items="['FT', 'GOAL_LINE']"
-        v-model="collection.filters[filterIndex].market"
-      ></v-select>
-
-      <v-select
-        label="For"
-        :items="['HOME', 'DRAW', 'AWAY', 'UNDER', 'OVER']"
-        v-model="collection.filters[filterIndex].for"
-      ></v-select>
-
-      <v-text-field label="From" v-model="collection.filters[filterIndex].from"></v-text-field>
-
-      <v-text-field label="To" v-model="collection.filters[filterIndex].to"></v-text-field>
-
-      <v-btn :disabled="!valid" color="success" @click="submitForm"> Submit </v-btn>
-    </v-form>
-  </v-container>
+                <v-text-field label="To" v-model="collection.filters[filterIndex].to"></v-text-field>
+              </div>
+              <v-btn :disabled="!valid" color="success" width="100%" @click="submitForm"> Submit </v-btn>
+            </v-form>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-container>
+  </div>
 </template>
 
 <script>
@@ -91,10 +154,12 @@ export default {
   data() {
     return {
       valid: true,
+      originalCollection: {},
       loaded: false,
       editCollection: false,
       selectedFilterIndex: null,
       newFilter: false,
+      componentKey: new Date().getTime(), // Initialize the key
       newPost: this.$route.query.collectionId === "NEW",
       collectionId: this.$route.query.collectionId || "NEW",
       filterIndex: this.$route.query.filterIndex ? parseInt(this.$route.query.filterIndex) : 0,
@@ -159,15 +224,32 @@ export default {
     if (this.filterIndex !== null) {
       this.selectedFilterIndex = `Filter ${this.filterIndex + 1}`
     }
+    if (this.$route.query.edit) {
+      this.editCollection = true
+    }
   },
   computed: {
     listOfFilters() {
       return this.collection.filters.map((filter, index) => {
         return `Filter ${index + 1}`
       })
+    },
+    editOrCreate() {
+      return this.newPost ? "Create a new collection" : "Edit Collection"
     }
   },
   methods: {
+    onFilterClick(filter) {
+      return window.open(
+        `/collection-detail?collectionId=${this.collection.id}&filterIndex=${this.collection.filters.indexOf(
+          filter
+        )}&edit=true`,
+        "_self"
+      )
+    },
+    redirect(path) {
+      this.$router.push(path)
+    },
     updateFilterIndex() {
       if (this.newFilter) {
         // Set filterIndex to the index of the new filter
@@ -198,6 +280,10 @@ export default {
       }
     },
     toggleEditing() {
+      if (this.editCollection) {
+        // User is canceling editing, revert the changes
+        this.collection = JSON.parse(JSON.stringify(this.originalCollection))
+      }
       this.editCollection = !this.editCollection
     },
     generateId() {
@@ -235,6 +321,10 @@ export default {
         const response = await axios.get(`http://localhost:3108/collection/${this.collectionId}`)
         this.collection = response.data
         this.fetchedData = response.data
+
+        // Store a deep copy of the original collection
+        this.originalCollection = JSON.parse(JSON.stringify(this.collection))
+
         // Update each property of this.collection with the data from the API
         this.collection.id = data.id
         this.collection.name = data.name
@@ -282,21 +372,22 @@ export default {
           response = await axios.post(`${collectionUrl}/${this.collectionId}`, this.collection)
           console.log("Collection updated:", response.data)
         }
-
         // Show success message and perform post-operation actions
         this.showSnackbar("Collection saved successfully", "success")
-        setTimeout(() => {
-          this.$router.push({
-            path: `/collection-detail`,
-            query: { collectionId: this.collectionId }
-          })
-        }, 1000)
+        this.redirectToUpdatedCollection()
       } catch (error) {
         console.error("Error saving collection:", error)
         this.showSnackbar("Error saving collection", "error")
       }
     },
-
+    redirectToUpdatedCollection() {
+      console.log("redirectToUpdatedCollection :>> ")
+      this.componentKey = new Date().getTime() // Update key to force re-render
+      return window.open(
+        `/collection-detail?collectionId=${this.collection.id}&filterIndex=${this.filterIndex}`,
+        "_self"
+      )
+    },
     showSnackbar(message, color) {
       // Emitting an event to show snackbar with the message and color
       eventBus.emit("show-snackbar", { text: message, color: color })
@@ -319,8 +410,44 @@ export default {
   cursor: pointer;
   transition: background-color 0.3s;
 }
-
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+}
 .my-nav-link:hover {
   background-color: #135ba1; /* a darker shade for hover effect */
+}
+
+.filters {
+  margin-bottom: 30px;
+  background-color: #ececec7d;
+  padding: 15px;
+}
+
+.filter-card {
+  cursor: pointer;
+  transition: box-shadow 0.3s ease;
+}
+
+.filter-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.filets-container {
+  background-color: #f5f5f5;
+  border-radius: 0 0 5px 5px;
+}
+.collection-top {
+  display: flex;
+  direction: row;
+  justify-content: space-between;
+  padding: 10px;
+  color: #fff; /* Default text color */
+  border-radius: 5px 5px 0 0;
+}
+.flex {
+  display: flex;
+  justify-content: flex-start;
 }
 </style>

@@ -98,7 +98,6 @@ export default {
   },
   async mounted() {
     this.fetchData()
-    eventBus.emit("show-snackbar", { text: "Your custom message here", color: "success" })
   }
 }
 </script>

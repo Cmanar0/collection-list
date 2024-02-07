@@ -14,6 +14,17 @@
       }"
     >
       <h3>{{ collection.name }}</h3>
+
+      <v-menu>
+        <template v-slot:activator="{ props }">
+          <v-btn icon="mdi-dots-vertical" @click.stop class="dots" v-bind="props"></v-btn>
+        </template>
+        <v-list>
+          <v-list-item v-for="(item, i) in items" :key="i" @click="item.action(collection)">
+            <v-list-item-title class="menu-item">{{ item.title }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
     </div>
     <div class="collection-bottom">
       <v-select
@@ -37,6 +48,7 @@
   </v-card>
 </template>
 <script>
+import axios from "axios"
 export default {
   mounted() {
     if (this.filterOptions[0]) {
@@ -46,10 +58,33 @@ export default {
   props: ["collection"],
   data() {
     return {
-      selectedFilter: ""
+      selectedFilter: "",
+      items: [
+        { title: "Edit", action: this.editCollection },
+        { title: "Delete", action: this.deleteCollection }
+      ]
     }
   },
   methods: {
+    editCollection(collection) {
+      this.$router.push({
+        path: `/collection-detail`,
+        query: {
+          collectionId: collection.id,
+          filterIndex: this.filterOptions.indexOf(this.selectedFilter),
+          edit: true
+        }
+      })
+    },
+    async deleteCollection(collection) {
+      try {
+        const response = await axios.delete(`http://localhost:3108/collection/${collection.id}`)
+        console.log(response.data.msg)
+        window.location.reload()
+      } catch (error) {
+        console.error("Error deleting collection:", error)
+      }
+    },
     handleCollectionClick(collection) {
       this.$router.push({
         path: `/collection-detail`,
@@ -111,6 +146,9 @@ export default {
   color: #666;
 }
 .collection-top {
+  display: flex;
+  direction: row;
+  justify-content: space-between;
   padding: 10px;
   color: #fff; /* Default text color */
 }
@@ -119,5 +157,15 @@ export default {
   padding: 10px;
   background-color: #fff;
   color: #000;
+}
+.dots {
+  max-width: 30px;
+  max-height: 30px;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
 }
 </style>
