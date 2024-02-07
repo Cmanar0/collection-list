@@ -17,7 +17,16 @@
 
       <v-menu>
         <template v-slot:activator="{ props }">
-          <v-btn icon="mdi-dots-vertical" @click.stop class="dots" v-bind="props"></v-btn>
+          <v-btn
+            icon="mdi-dots-vertical"
+            @click.stop
+            class="dots"
+            v-bind="props"
+            :style="{
+              backgroundColor: `#${collection.color}`,
+              color: textColor(collection.color)
+            }"
+          ></v-btn>
         </template>
         <v-list>
           <v-list-item v-for="(item, i) in items" :key="i" @click="item.action(collection)">
